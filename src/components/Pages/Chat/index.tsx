@@ -5,7 +5,7 @@ import { UserContext } from "@/contexts/UserContext";
 import { User, UserFriend } from "@/types/User";
 import { useContext, useState, useRef, useEffect, useLayoutEffect, ReactNode } from "react";
 
-import { ImgSendType, SelectedChatInfo } from "@/types/Message";
+import { ImgSendType, MessageType, SelectedChatInfo } from "@/types/Message";
 
 import { BsGearFill, BsPersonFillAdd, BsPlus } from "react-icons/bs";
 import { SlEnvolopeLetter } from "react-icons/sl";
@@ -34,6 +34,7 @@ import { MenuContext } from "@/contexts/MenuContext";
 import ImageModal from "@/components/Organisms/ImageModal";
 import { ChatContext } from "@/contexts/ChatContext";
 import ShowChatPhotoModal from "./Modals/ShowChatPhotoModal";
+import { MessagesContext } from "@/contexts/MessagesContext";
 
 //import { headers } from "next/headers";
 
@@ -80,34 +81,6 @@ const Chat = () => {
     // Armazena o emoji selecionado
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
 
-    const [userGroups, setUserGroups] = useState<Group[]>([]);
-    const [userFriends, setUserFriends] = useState<UserFriend[]>([]);
-
-    const handleNewMsg = async () => {
-        // Caso haja algum arquivo selecionado
-        if (files.length > 0) {
-
-            // Monto a mensagem com autor, imgs e texto
-            let msg: ImgSendType = { user: userCtx!.user!, msg: msgInput.trim(), imgs: files };
-
-            // Envio ao servidor a mensagem com as imagens
-            socketCtx.socket!.emit("send-img", msg);
-
-            // Reseto os arquivos e a entrada de texto
-            setFiles([]);
-            setMsgInput("");
-            return;
-        }
-
-        // Envio de mensagem normal(sem img)
-        if (msgInput != "") {
-            //let newMsg: MessageType = { author: userCtx!.user!, msg: msgInput.trim(), type: "msg" };
-
-            //socketCtx.socket!.emit("send-msg", newMsg);
-            setMsgInput("");
-        }
-    }
-
     const handleFileDragEnter = (e: React.DragEvent) => {
         menuCtx.setShowFileInput(true);
     }
@@ -119,11 +92,6 @@ const Chat = () => {
 
     const handleEmojiClicked = (emoji: EmojiClickData) => {
         setSelectedEmoji(emoji.emoji);
-    }
-
-    const handleSelectedChat = (info: SelectedChatInfo) => {
-        chatCtx.setActiveChat(info);
-
     }
 
     // Monitora se um novo usuario entrou ao chat(emitido pelo servidor)
@@ -151,52 +119,12 @@ const Chat = () => {
         menuCtx.setShowCreateGroupModal(true);
     }
 
-    const handleAddGroup = (group: Group) => {
-        setUserGroups([...userGroups, group]);
-    }
-
     const handleShowAddFriendBtn = () => {
         menuCtx.setShowAddFriendModal(true);
     }
 
     const handleConfigBtn = () => {
         menuCtx.setShowConfigModal(true);
-    }
-
-    const updateUserFriendList = (friend: UserFriend, operation: "add" | "del") => {
-        //console.log(friend);        
-
-        switch (operation) {
-            case "add":
-                setUserFriends([...userFriends, friend]);
-                break;
-
-            case "del":
-                if (chatCtx.activeChat?.uuid == friend.uuid) {
-                    chatCtx.setActiveChat(null);
-                }
-
-                let friends = userFriends.filter((fr) => fr.nickName != friend.nickName);
-                setUserFriends([...friends]);
-                break;
-        }
-    }
-
-    const updateUserGroupList = (group: Group, operation: "add" | "del") => {
-        switch (operation) {
-            case "add":
-                setUserGroups([...userGroups, group]);
-                break;
-
-            case "del":
-                if (chatCtx.activeChat?.uuid == group.uuid) {
-                    chatCtx.setActiveChat(null);
-                }
-
-                let groups = userGroups.filter((gr) => gr.uuid != group.uuid && gr.createdAt != group.createdAt);
-                setUserGroups([...groups]);
-                break;
-        }
     }
 
     const handlePendingInvitationsBtn = async () => {
@@ -233,40 +161,14 @@ const Chat = () => {
         return () => window.removeEventListener("click", handleClick);
     }, [menuCtx.showContextMenu]);
 
-    useLayoutEffect(() => {
-        if ((userCtx!.token == "" || userCtx.user == null) && userCtx.initialized == true) {
-            router.push("/login");
-            return;
-        }
-
-        if (userCtx?.user != null && userCtx.token != "" && userCtx.initialized == true) {
-            getUserGroups(userCtx.user.uuid).then((res) => {
-                setUserGroups(res);
-            });
-
-            getUserFriends(userCtx.user.uuid).then((res) => {
-                setUserFriends(res);
-                //console.log(res);
-            });
-        }
-
-        if (userCtx?.token != "") {
-            socketCtx.socket?.connect();
-        }
-
-        //console.log(userCtx.token);
-
-
-    }, [socketCtx.socket, userCtx.initialized]);
-
     return (
         <>
             {(menuCtx.showCreateGroupModal == true) &&
-                <CreateNewGroupModal addGroup={handleAddGroup} />
+                <CreateNewGroupModal />
             }
 
             {(menuCtx.showAddFriendModal == true) &&
-                <AddFriendModal updateFriendList={updateUserFriendList} />
+                <AddFriendModal />
             }
 
             {(menuCtx.showConfigModal == true) &&
@@ -274,7 +176,7 @@ const Chat = () => {
             }
 
             {(menuCtx.showPendingInvitations == true) &&
-                <PendingInvitationsModal updateFriendList={updateUserFriendList} />
+                <PendingInvitationsModal />
             }
 
             {(menuCtx.showImageModal == true) &&
@@ -338,20 +240,18 @@ const Chat = () => {
                                     <TabPanel value="friends" className="h-full max-h-full p-0">
                                         <StyledChatsContainer>
                                             {
-                                                userFriends.map((friend, idx) => {
+                                                chatCtx.friends.map((friend, idx) => {
                                                     return <FriendCard
                                                         key={idx}
                                                         idx={idx}
                                                         isSelected={(chatCtx.activeChat?.type == "user" && chatCtx.activeChat.index == idx) ? true : false}
-                                                        setSelected={handleSelectedChat}
                                                         friend={friend}
-                                                        updateUserFriendList={updateUserFriendList}
                                                         className={`${(chatCtx.activeChat?.type == "user" && chatCtx.activeChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
                                             }
 
-                                            {(userFriends.length == 0) &&
+                                            {(chatCtx.friends.length == 0) &&
                                                 <Paragraph
                                                     className="text-center"
                                                 >
@@ -365,19 +265,17 @@ const Chat = () => {
                                     <TabPanel value="groups" className="flex h-full max-h-fit overflow-hidden p-0">
                                         <StyledChatsContainer>
                                             {
-                                                userGroups.map((group, idx) => {
+                                                chatCtx.groups.map((group, idx) => {
                                                     return <GroupCard
-                                                        key={idx}
+                                                        key={`${group.uuid}${group.name}${idx}`}
                                                         idx={idx}
-                                                        setSelected={handleSelectedChat}
                                                         group={group}
-                                                        updateUserGroupList={updateUserGroupList}
                                                         className={`${(chatCtx.activeChat?.type == "group" && chatCtx.activeChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
                                             }
 
-                                            {(userGroups.length == 0) &&
+                                            {(chatCtx.groups.length == 0) &&
                                                 <Paragraph
                                                     className="text-center"
                                                 >
@@ -447,12 +345,7 @@ const Chat = () => {
 
                         {/* Container com as mensagens do chat selecionado */}
                         {(userCtx!.user != null && chatCtx.activeChat != null) &&
-
-                            <MessagesContainer
-                                selectedChat={chatCtx.activeChat}
-                                userFriends={userFriends}
-                                userGroups={userGroups}
-                            />
+                            <MessagesContainer />
                         }
 
                         {/* Arquivos anexados */}

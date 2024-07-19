@@ -44,13 +44,12 @@ const StyledUserCard = styled.div.attrs(() => ({}))`
 type props = {
     idx: number;
     friend: UserFriend;
-    updateUserFriendList: (friend: UserFriend, operation: "add" | "del") => void;
     handleOnAccept: (friendUuid: string, friend: UserFriend) => void;
     className?: string;
 }
 
 
-const PendingFriendCard = ({ idx, friend, updateUserFriendList, handleOnAccept, className }: props) => {
+const PendingFriendCard = ({ idx, friend, handleOnAccept, className }: props) => {
 
     const userCtx = useContext(UserContext)!;
 

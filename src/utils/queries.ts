@@ -1,4 +1,4 @@
-import { getGroupMembers, getGroupMessages, getUserMessages, searchFriends } from "@/lib/actions";
+import { getGroupMembers, getGroupMessages, getUserMessages, isUserGroupAdmin, searchFriends } from "@/lib/actions";
 import { MessageType } from "@/types/Message";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
@@ -58,6 +58,19 @@ export const useGroupMembers = (groupUuid: string) => {
         queryKey: ["group", groupUuid, "members"],
         queryFn: () => getGroupMembers(groupUuid),
         staleTime: 0
+    });
+
+    return query;
+}
+
+
+export const useIsUserAdmin = (groupUuid: string, userUuid: string) => {
+    const query = useQuery<boolean>({
+        enabled: true,
+        networkMode: "online",
+        queryKey: ["groupAdmin", groupUuid, userUuid],
+        queryFn: () => isUserGroupAdmin(groupUuid, userUuid),
+        staleTime: Infinity
     });
 
     return query;

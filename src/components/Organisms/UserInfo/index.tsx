@@ -1,6 +1,6 @@
 import { SelectedChatInfo } from "@/types/Message";
 import { UserFriend } from "@/types/User";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BsX } from "react-icons/bs";
 import { MenuContext } from "@/contexts/MenuContext";

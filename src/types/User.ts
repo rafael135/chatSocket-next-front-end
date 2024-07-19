@@ -18,6 +18,7 @@ export type UserFriend = {
     name: string;
     nickName: string;
     email: string;
+    worker?: Worker;
     createdAt: string;
     updatedAt: string;
 };

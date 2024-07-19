@@ -10,16 +10,18 @@ import { useContext, useState } from "react";
 import Paragraph from "@/components/Atoms/Paragraph";
 import { MenuContext } from "@/contexts/MenuContext";
 import { UserContext } from "@/contexts/UserContext";
+import { ChatContext } from "@/contexts/ChatContext";
 
 
 type props = {
     //createNewGroup: (groupName: string, userUuid: string) => Promise<Group | null>;
-    addGroup: (group: Group) => void;
+    //addGroup: (group: Group) => void;
 };
 
-const CreateNewGroupModal = ({ addGroup }: props) => {
+const CreateNewGroupModal = ({ }: props) => {
 
     const userCtx = useContext(UserContext)!;
+    const chatCtx = useContext(ChatContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const [groupName, setGroupName] = useState<string>("");
@@ -28,7 +30,10 @@ const CreateNewGroupModal = ({ addGroup }: props) => {
         let res = await createNewGroup(groupName, userCtx.user!.uuid);
 
         if(res != null) {
-            addGroup(res);
+            chatCtx.setGroups({
+                type: "add",
+                group: res
+            });
             menuCtx.setShowCreateGroupModal(false);
         }
     }

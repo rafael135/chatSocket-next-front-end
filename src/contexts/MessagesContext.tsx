@@ -1,22 +1,26 @@
 "use client"
 
-import { MessageType } from "@/types/Message";
+import { MessageImageType, MessageType } from "@/types/Message";
+import { User } from "@/types/User";
 import { ReactNode, createContext, useState } from "react";
 
 
 
+type MessageTypeGeneral = {
+    author: User | null;
+    messages: MessageType[];
+}
 
 type MessageContextType = {
-    messages: MessageType[];
-    setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
+    messages: MessageTypeGeneral[];
+    setMessages: React.Dispatch<React.SetStateAction<MessageTypeGeneral[]>>;
 }
 
 export const MessagesContext = createContext<MessageContextType | null>(null);
 
 
 export const MessagesProvider = ({ children }: { children: ReactNode }) => {
-
-    const [messages, setMessages] = useState<MessageType[]>([]);
+    const [messages, setMessages] = useState<MessageTypeGeneral[]>([]);
 
 
     return (

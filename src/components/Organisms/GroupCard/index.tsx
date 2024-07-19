@@ -1,5 +1,6 @@
 import Paragraph from "@/components/Atoms/Paragraph";
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
+import { ChatContext } from "@/contexts/ChatContext";
 import { MenuContext } from "@/contexts/MenuContext";
 import { exitGroup, getGroupMessages } from "@/lib/actions";
 import { Group } from "@/types/Group";
@@ -48,13 +49,12 @@ const StyledGroupCard = styled.div.attrs(() => ({}))`
 type props = {
     idx: number;
     group: Group;
-    setSelected: (info: SelectedChatInfo) => void;
-    updateUserGroupList: (group: Group, operation: "add" | "del") => void;
     className?: string;
 }
 
-const GroupCard = ({ idx, group, setSelected, updateUserGroupList, className }: props) => {
+const GroupCard = ({ idx, group, className }: props) => {
     const menuCtx = useContext(MenuContext)!;
+    const chatCtx = useContext(ChatContext)!;
 
     const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
 
@@ -62,7 +62,10 @@ const GroupCard = ({ idx, group, setSelected, updateUserGroupList, className }: 
         let res = await exitGroup(group.uuid);
 
         if (res == true) {
-            updateUserGroupList(group, "del");
+            chatCtx.setGroups({
+                type: "del",
+                group: group
+            });
             menuCtx.setShowContextMenu(false);
             menuCtx.setShowChatInfo(false);
         }
@@ -83,6 +86,10 @@ const GroupCard = ({ idx, group, setSelected, updateUserGroupList, className }: 
         );
 
         menuCtx.setShowContextMenu(true);
+    }
+
+    const handleSelectChat = () => {
+        chatCtx.setActiveChat({ index: idx, name: group.name, srcImg: group.groupImg, type: "group", uuid: group.uuid });
     }
 
     useLayoutEffect(() => {
@@ -109,7 +116,7 @@ const GroupCard = ({ idx, group, setSelected, updateUserGroupList, className }: 
 
                 exit={{ x: 500 }}
             >
-                <StyledGroupCard className={className} onClick={() => { setSelected({ index: idx, name: group.name, srcImg: group.groupImg, type: "group", uuid: group.uuid }); menuCtx.setShowChatInfo(false); }}>
+                <StyledGroupCard className={className} onClick={handleSelectChat}>
                     <div className="h-12 w-12 max-w-12 max-h-12 flex justify-center items-center border border-solid border-gray-600/40 bg-white rounded-full">
                         {(group.groupImg != null) &&
                             <Image

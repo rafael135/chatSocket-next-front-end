@@ -7,11 +7,12 @@ import { Group } from "@/types/Group";
 import Paragraph from "@/components/Atoms/Paragraph";
 import Button from "@/components/Atoms/Button";
 import UserCard from "../UserCard";
-import { useGroupMembers } from "@/utils/queries";
+import { useGroupMembers, useIsUserAdmin } from "@/utils/queries";
 import { Spinner } from "flowbite-react";
 import { MenuContext } from "@/contexts/MenuContext";
 import Image from "next/image";
 import DefaultChatPhoto from "@/components/Atoms/DefaultChatPhoto";
+import { UserContext } from "@/contexts/UserContext";
 
 
 
@@ -24,11 +25,13 @@ type props = {
 const GroupInfo = ({ selectedChat, userGroup }: props) => {
 
     const menuCtx = useContext(MenuContext)!;
+    const userCtx = useContext(UserContext)!;
 
     //const [isLoading, setIsLoading] = useState()
     //const [groupMembers, setGroupMembers] = useState<User[]>([]);
 
     const groupMembersQuery = useGroupMembers(userGroup.uuid);
+    const isLoggedUserAdminQuery = useIsUserAdmin(userGroup.uuid, userCtx.user?.uuid ?? "");
 
     const date = new Date(Date.parse(userGroup.createdAt));
     const day = `${(date.getDay() < 10) ? `0${date.getDay()}` : date.getDay()}`;
@@ -40,6 +43,8 @@ const GroupInfo = ({ selectedChat, userGroup }: props) => {
 
         groupMembersQuery.refetch();
     }
+
+    
 
     return(
         <AnimatePresence>

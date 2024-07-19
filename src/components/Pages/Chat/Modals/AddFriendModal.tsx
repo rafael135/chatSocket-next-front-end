@@ -5,6 +5,7 @@ import TextInput from "@/components/Atoms/TextInput";
 import SearchFriend from "@/components/Molecules/SearchFriend";
 import Modal from "@/components/Organisms/Modal"
 import ModalHeader from "@/components/Organisms/Modal/ModalHeader";
+import { ChatContext } from "@/contexts/ChatContext";
 import { MenuContext } from "@/contexts/MenuContext";
 import { addOrRemoveFriend, searchFriends } from "@/lib/actions";
 import { UserFriend } from "@/types/User";
@@ -14,11 +15,12 @@ import { useContext, useEffect, useState } from "react";
 
 
 type props = {
-    updateFriendList: (newFriend: UserFriend, operation: "add" | "del") => void;
+    //updateFriendList: (newFriend: UserFriend, operation: "add" | "del") => void;
 };
 
-const AddFriendModal = ({ updateFriendList }: props) => {
+const AddFriendModal = ({ }: props) => {
 
+    const chatCtx = useContext(ChatContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const [searchName, setSearchName] = useState<string>("");
@@ -69,7 +71,10 @@ const AddFriendModal = ({ updateFriendList }: props) => {
             });
 
             setResult([...friends]);
-            updateFriendList(res, "add");
+            chatCtx.setFriends({
+                type: "add",
+                friend: res
+            });
         } else {
             let friends = result;
             
@@ -83,7 +88,10 @@ const AddFriendModal = ({ updateFriendList }: props) => {
             });
 
             setResult([...friends]);
-            updateFriendList(res, "del");
+            chatCtx.setFriends({
+                type: "del",
+                friend: res
+            });
         }
     }
 

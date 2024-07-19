@@ -13,17 +13,19 @@ const Providers = ({ children }: { children: ReactNode }) => {
     return (
         <UserProvider>
             {/*<ProtectRoute>*/}
-                <SocketContextProvider>
+            <SocketContextProvider>
+
+                <MessagesProvider>
                     <ChatContextProvider>
-                        <MessagesProvider>
-                            <QueryProvider>
-                                <MenuContextProvider>
-                                    {children}
-                                </MenuContextProvider>
-                            </QueryProvider>
-                        </MessagesProvider>
+                        <QueryProvider>
+                            <MenuContextProvider>
+                                {children}
+                            </MenuContextProvider>
+                        </QueryProvider>
                     </ChatContextProvider>
-                </SocketContextProvider>
+                </MessagesProvider>
+
+            </SocketContextProvider>
             {/*</ProtectRoute>*/}
         </UserProvider>
     );

@@ -10,6 +10,7 @@ import styled from "styled-components";
 
 import { AnimatePresence, motion } from "framer-motion";
 import { MenuContext } from "@/contexts/MenuContext";
+import { ChatContext } from "@/contexts/ChatContext";
 
 
 
@@ -51,20 +52,22 @@ type props = {
     idx: number;
     friend: UserFriend;
     isSelected: boolean;
-    setSelected: (info: SelectedChatInfo) => void;
-    updateUserFriendList: (friend: UserFriend, operation: "add" | "del") => void;
     className?: string;
 }
 
-const FriendCard = ({ idx, friend, isSelected, setSelected, updateUserFriendList, className }: props) => {
+const FriendCard = ({ idx, friend, isSelected, className }: props) => {
     
+    const chatCtx = useContext(ChatContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const handleRemoveFriendBtn = async () => {
         let res = await addOrRemoveFriend(friend.uuid);
 
         if(res == null) {
-            updateUserFriendList(friend, "del");
+            chatCtx.setFriends({
+                type: "del",
+                friend: friend
+            });
             menuCtx.setShowContextMenu(false);
         }
     }
@@ -86,6 +89,10 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, updateUserFriendList
         menuCtx.setShowContextMenu(true);
     }
 
+    const handleSelectChat = () => {
+        chatCtx.setActiveChat({ index: idx, name: friend.name, srcImg: friend.avatarSrc, type: "user", uuid: friend.uuid });
+    }
+
     return (
         <AnimatePresence>
             <motion.div
@@ -104,8 +111,8 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, updateUserFriendList
 
                 exit={{ x: 500 }}
             >
-                <StyledUserCard className={className} onClick={() => setSelected({ index: idx, name: friend.name, srcImg: friend.avatarSrc, type: "user", uuid: friend.uuid })}>
-                    <div className="h-12 w-12 max-w-12 max-h-12 flex justify-center items-center border border-solid border-gray-600/40 bg-white rounded-full">
+                <StyledUserCard className={className} onClick={handleSelectChat}>
+                    <div className="relative h-12 w-12 max-w-12 max-h-12 flex justify-center items-center border border-solid border-gray-600/40 bg-white rounded-full">
                         {(friend?.avatarSrc != null) &&
                             <Image
                                 loading="lazy"
@@ -121,6 +128,8 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, updateUserFriendList
                         {(friend?.avatarSrc == null) &&
                             <BsPersonFill className="w-10 h-auto fill-slate-700" />
                         }
+
+                        <span className="absolute -bottom-1.5 -left-1.5 flex justify-center items-center h-6 w-6 bg-blue-600 text-white text-xs rounded-full">2</span>
                     </div>
 
                     <Paragraph className="flex-1 mt-0.5 text-slate-800 text-lg font-normal truncate">{friend.name}</Paragraph>

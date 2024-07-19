@@ -3,6 +3,7 @@ export type Group = {
     uuid: string;
     name: string;
     groupImg: string;
+    worker?: Worker;
     createdAt: string;
     updatedAt: string;
 };

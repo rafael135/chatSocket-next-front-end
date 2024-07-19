@@ -10,16 +10,18 @@ import { FaArrowRotateRight } from "react-icons/fa6";
 import { UserFriend } from "@/types/User";
 import { Spinner } from "flowbite-react";
 import { useContext, useState } from "react";
+import { ChatContext } from "@/contexts/ChatContext";
 
 
 
 type props = {
-    updateFriendList: (newFriend: UserFriend, operation: "add" | "del") => void;
+    //updateFriendList: (newFriend: UserFriend, operation: "add" | "del") => void;
 };
 
-const PendingInvitationsModal = ({ updateFriendList }: props) => {
+const PendingInvitationsModal = ({ }: props) => {
 
     const userCtx = useContext(UserContext)!;
+    const chatCtx = useContext(ChatContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const [pendingFriends, setPendingFriends] = useState<UserFriend[]>([]);
@@ -30,7 +32,10 @@ const PendingInvitationsModal = ({ updateFriendList }: props) => {
         let res = await addOrRemoveFriend(friendUuid);
 
         if (res != null) {
-            updateFriendList(friend, "add");
+            chatCtx.setFriends({
+                type: "add",
+                friend: friend
+            });
             setPendingFriends([...pendingFriends.filter((fr) => fr.uuid != friendUuid)]);
         }
         setLoading(false);
@@ -62,7 +67,7 @@ const PendingInvitationsModal = ({ updateFriendList }: props) => {
                 <div className={`flex-1 p-1 flex flex-col overflow-y-auto overflow-x-hidden border border-solid border-gray-600/40 rounded-lg ${(loading == true || pendingFriends.length == 0) ? "justify-center items-center" : ""}`}>
                     {(pendingFriends.length > 0 && loading == false) &&
                         pendingFriends.map((friend, idx) => {
-                            return <PendingFriendCard key={idx} updateUserFriendList={updateFriendList} handleOnAccept={handleAcceptFriend} friend={friend} idx={idx} />
+                            return <PendingFriendCard key={idx} handleOnAccept={handleAcceptFriend} friend={friend} idx={idx} />
                         })
                     }
 
