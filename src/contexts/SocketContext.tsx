@@ -13,8 +13,10 @@ export const SocketContext = createContext<SocketContextType | null>(null);
 export const SocketContextProvider = ({ children }: { children: ReactNode }) => {
     const userCtx = useContext(UserContext)!;
 
+    const API_URL = `${process.env.API_HOST ?? "http://localhost"}:${process.env.API_PORT ?? 7000}`;
+
     const [socketState, setSocketState] = useState<Socket | null>(
-        io("http://localhost:7000", {
+        io(API_URL, {
             auth: {
                 token: `Bearer ${userCtx.token ?? ""}`
             },

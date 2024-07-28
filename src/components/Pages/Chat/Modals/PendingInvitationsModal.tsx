@@ -32,7 +32,7 @@ const PendingInvitationsModal = ({ }: props) => {
         let res = await addOrRemoveFriend(friendUuid);
 
         if (res != null) {
-            chatCtx.setFriends({
+            chatCtx.dispatchFriends({
                 type: "add",
                 friend: friend
             });

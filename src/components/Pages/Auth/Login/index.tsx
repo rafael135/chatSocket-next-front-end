@@ -95,7 +95,7 @@ const Login = () => {
 
                     setTimeout(() => {
                         router.push("/");
-                    }, 600);
+                    }, 700);
                 }
             }
             catch (err) {

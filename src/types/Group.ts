@@ -1,3 +1,4 @@
+import { MessageType } from "./Message";
 
 export type Group = {
     uuid: string;
@@ -6,6 +7,8 @@ export type Group = {
     worker?: Worker;
     createdAt: string;
     updatedAt: string;
+
+    messages: MessageType[];
 };
 
 

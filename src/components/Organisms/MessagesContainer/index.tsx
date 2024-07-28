@@ -15,6 +15,9 @@ import GroupInfo from "../GroupInfo";
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
 import { MenuContext } from "@/contexts/MenuContext";
 import { ChatContext } from "@/contexts/ChatContext";
+import { SocketContext } from "@/contexts/SocketContext";
+import { queryClient } from "@/utils/queryClient";
+import { MessageType } from "@/types/Message";
 
 
 
@@ -24,6 +27,7 @@ type props = {
 
 const MessagesContainer = ({  }: props) => {
 
+    const socketCtx = useContext(SocketContext)!;
     const menuCtx = useContext(MenuContext)!;
     const chatCtx = useContext(ChatContext)!;
 
@@ -58,7 +62,7 @@ const MessagesContainer = ({  }: props) => {
     
     useEffect(() => {
         if (messageQuery.data != undefined) {
-            chatCtx.setMessages([...messageQuery.data]);
+            chatCtx.dispatchActiveMessages({ type: "initialize", initialState: messageQuery.data });
         }
     }, [messageQuery.data]);
 
@@ -70,7 +74,33 @@ const MessagesContainer = ({  }: props) => {
                 top: messagesContainerRef.current.scrollHeight
             });
         }, 90);
-    }, [chatCtx.messages]);
+    }, [chatCtx.activeMessages]);
+
+    // Monitora se há uma nova mensagem em um usuário
+    socketCtx.socket?.on("new_private_msg", (newMsg: MessageType) => {
+        //dispatchFriendsMessages({ type: "add", message: newMsg });
+
+        queryClient.setQueryData(["user", newMsg.toUuid], [...(queryClient.getQueryData(["user", newMsg.toUuid]) as MessageType[]), newMsg]);
+        if (newMsg.toUuid == chatCtx.activeChat?.uuid) {
+            chatCtx.dispatchActiveMessages({
+                type: "add",
+                message: newMsg
+            });
+        }
+    });
+
+    // Monitora se há uma nova mensagem em um grupo
+    socketCtx.socket?.on("new_group_msg", (newMsg: MessageType) => {
+        //dispatchGroupsMessages({ type: "add", message: newMsg });
+
+        queryClient.setQueryData(["group", newMsg.toUuid], [...(queryClient.getQueryData(["group", newMsg.toUuid]) as MessageType[]), newMsg]);
+        if (newMsg.toUuid == chatCtx.activeChat?.uuid) {
+            chatCtx.dispatchActiveMessages({
+                type: "add",
+                message: newMsg
+            });
+        }
+    });
     
 
     return (
@@ -127,8 +157,8 @@ const MessagesContainer = ({  }: props) => {
                     </div>
                 }
 
-                {(chatCtx.messages.length > 0 && messageQuery.isFetching == false && messageQuery.isLoading == false) &&
-                    chatCtx.messages.map((msg, idx) => {
+                {(chatCtx.activeMessages.length > 0 && messageQuery.isFetching == false && messageQuery.isLoading == false) &&
+                    chatCtx.activeMessages.map((msg, idx) => {
                         return <Message msg={msg} key={`${msg.author!.uuid}#${idx}`} />
                     })
                 }

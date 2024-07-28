@@ -24,9 +24,10 @@ type props = {
     name: string;
     inputRef?: MutableRefObject<HTMLInputElement | null>;
     required?: boolean;
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
-const TextInput = ({ className, type, value, setValue, name, inputRef, required }: props) => {
+const TextInput = ({ className, type, value, setValue, name, inputRef, required, onKeyDown }: props) => {
 
     return(
         <StyledInput
@@ -35,6 +36,7 @@ const TextInput = ({ className, type, value, setValue, name, inputRef, required 
             type={type || "text"}
             value={value}
             onChange={(e) => { setValue(e.target!.value); }}
+            onKeyDown={onKeyDown}
             className={`${className}`}
             ref={inputRef}
             required={required}

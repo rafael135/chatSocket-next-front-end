@@ -3,29 +3,42 @@
 import { Group } from "@/types/Group";
 import { MessageType, SelectedChatInfo } from "@/types/Message";
 import { UserFriend } from "@/types/User";
-import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useEffect, useLayoutEffect, useReducer, useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useEffect, useLayoutEffect, useMemo, useReducer, useState } from "react";
 import { MessagesContext } from "./MessagesContext";
 import { SocketContext } from "./SocketContext";
 import { UserContext } from "./UserContext";
 import friendsReducer from "@/reducers/friendsReducer";
 import { groupsReducer } from "@/reducers/groupsReducer";
-import { UserFriendAction, UserGroupAction } from "@/types/Reducer";
+import { MessageAction, UserFriendAction, UserGroupAction } from "@/types/Reducer";
 import { useRouter } from "next/navigation";
-import { getUserFriends, getUserGroups } from "@/lib/actions";
+import { getGroupMessages, getUserFriends, getUserGroups, getUserMessages } from "@/lib/actions";
+import { messagesReducer } from "@/reducers/messagesReducer";
+import { queryClient } from "@/utils/queryClient";
 
 
 type ChatContextType = {
     activeChat: SelectedChatInfo | null;
     setActiveChat: Dispatch<SetStateAction<SelectedChatInfo | null>>;
-    messages: MessageType[];
-    setMessages: Dispatch<SetStateAction<MessageType[]>>;
+    activeMessages: MessageType[];
+    dispatchActiveMessages: Dispatch<MessageAction>;
     friends: UserFriend[];
-    setFriends: Dispatch<UserFriendAction>;
+    dispatchFriends: Dispatch<UserFriendAction>;
+    friendsMessages: MessageType[];
+    dispatchFriendsMessages: Dispatch<MessageAction>;
     groups: Group[];
-    setGroups: Dispatch<UserGroupAction>;
+    dispatchGroups: Dispatch<UserGroupAction>;
+    groupsMessages: MessageType[];
+    dispatchGroupsMessages: Dispatch<MessageAction>;
 };
 
 export const ChatContext = createContext<ChatContextType | null>(null);
+
+
+const FRIENDS_LOCAL_KEY = "chatSocketFriends";
+const FRIENDS_MESSAGES_LOCAL_KEY = "chatSocketFriendsMessages";
+const GROUPS_LOCAL_KEY = "chatSocketGroups";
+const GROUPS_MESSAGES_LOCAL_KEY = "chatSocketGroupsMessages";
+
 
 export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
@@ -36,80 +49,24 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     const socketCtx = useContext(SocketContext)!;
 
     const [activeChat, setActiveChat] = useState<SelectedChatInfo | null>(null);
-    const [messages, setMessages] = useState<MessageType[]>([]);
+    const [activeMessages, dispatchActiveMessages] = useReducer(messagesReducer, []);
+    //const [messages, setMessages] = useState<MessageType[]>([]);
 
 
     const [friends, dispatchFriends] = useReducer(friendsReducer, []);
+    const [friendsMessages, dispatchFriendsMessages] = useReducer(messagesReducer, []);
     const [groups, dispatchGroups] = useReducer(groupsReducer, []);
+    const [groupsMessages, dispatchGroupsMessages] = useReducer(messagesReducer, []);
 
 
     useLayoutEffect(() => {
-        if(userCtx.initialized != true) {
+        if (userCtx.initialized != true || socketCtx.socket?.connected != true) {
             return;
         }
 
-        // Monitora se há uma nova mensagem em um usuário
-        socketCtx.socket?.on("new_private_msg", (newMsg: MessageType) => {
-            setMessages([...messages, newMsg]);
-
-            /*
-            let isAuthorKnow = messagesCtx!.messages.findIndex((aut) => aut.author!.uuid == newMsg.author!.uuid);
-
-            if(isAuthorKnow == -1) {
-                
 
 
-                
-                messagesCtx!.setMessages([...messagesCtx!.messages, {
-                    author: newMsg.author,
-                    messages: [newMsg]
-                }]);
-                
-                
-            } else {
-                
-                messagesCtx!.setMessages([...messagesCtx!.messages.map((aut, index) => {
-                    if(isAuthorKnow == index) {
-                        aut.messages = [...aut.messages, newMsg];
-                    }
-                    return aut;
-                })]);
-            }
-            */
-            
-            
-        });
-    
-        // Monitora se há uma nova mensagem em um grupo
-        socketCtx.socket?.on("new_group_msg", (newMsg: MessageType) => {
-            setMessages([...messages, newMsg]);
-
-            /*
-            let isGroupKnow = messagesCtx!.messages.findIndex((aut) => aut.author!.uuid == newMsg.author!.uuid);
-            
-            if(isGroupKnow == -1) {
-                /*
-                messagesCtx!.setMessages([...messagesCtx!.messages, {
-                    author: newMsg.author,
-                    messages: [newMsg]
-                }]);
-                
-
-                
-            } else {
-                
-                messagesCtx!.setMessages([...messagesCtx!.messages.map((aut, index) => {
-                    if(isGroupKnow == index) {
-                        aut.messages = [...aut.messages, newMsg];
-                    }
-                    return aut;
-                })]);
-                
-            }
-            */
-        });
-
-    }, [userCtx.initialized, messages]);
+    }, [userCtx.initialized, friendsMessages, groupsMessages]);
 
 
     useLayoutEffect(() => {
@@ -141,21 +98,74 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     }, [socketCtx.socket, userCtx.initialized]);
 
     useEffect(() => {
-        //console.log(messages);
-    }, [messages])
+        if (friends.length == 0) {
+            return;
+        }
+
+        for (let i = 0; i < friends.length; i++) {
+            getUserMessages(friends[i].uuid).then((res) => {
+                //console.log(res);
+                queryClient.setQueryData(["user", friends[i].uuid], res);
+            }).catch((e) => {
+
+            });
+        }
+    }, [friends]);
+
+    useEffect(() => {
+        if (groups.length == 0) {
+            return;
+        }
+
+        for (let i = 0; i < groups.length; i++) {
+            getGroupMessages(groups[i].uuid).then((res) => {
+                //console.log(res);
+                queryClient.setQueryData(["group", groups[i].uuid], res);
+            }).catch((e) => {
+
+            });
+        }
+    }, [groups]);
 
 
 
-    return(
+
+    useMemo(() => {
+        if (friends.length > 0) {
+            window.localStorage.setItem(FRIENDS_LOCAL_KEY, JSON.stringify(friends));
+        }
+    }, [friends]);
+
+    useMemo(() => {
+        if (groups.length > 0) {
+            window.localStorage.setItem(GROUPS_LOCAL_KEY, JSON.stringify(groups));
+        }
+    }, [groups]);
+
+    useMemo(() => {
+        if (friendsMessages.length > 0) {
+            window.localStorage.setItem(FRIENDS_MESSAGES_LOCAL_KEY, JSON.stringify(friendsMessages));
+        }
+    }, [friendsMessages]);
+
+    useMemo(() => {
+        if (groupsMessages.length > 0) {
+            window.localStorage.setItem(GROUPS_MESSAGES_LOCAL_KEY, JSON.stringify(groupsMessages));
+        }
+    }, [groupsMessages]);
+
+    return (
         <ChatContext.Provider
-            value={{ 
+            value={{
                 activeChat: activeChat, setActiveChat: setActiveChat,
-                messages: messages, setMessages: setMessages,
-                friends: friends, setFriends: dispatchFriends,
-                groups: groups, setGroups: dispatchGroups
+                activeMessages: activeMessages, dispatchActiveMessages: dispatchActiveMessages,
+                friends: friends, dispatchFriends: dispatchFriends,
+                friendsMessages: friendsMessages, dispatchFriendsMessages: dispatchFriendsMessages,
+                groups: groups, dispatchGroups: dispatchGroups,
+                groupsMessages: groupsMessages, dispatchGroupsMessages: dispatchGroupsMessages
             }}
         >
-            { children }
+            {children}
         </ChatContext.Provider>
     );
 }

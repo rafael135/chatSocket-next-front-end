@@ -103,14 +103,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [tokenState]);
 
-    const _setToken = (token: string) => {
-        setTokenState(token);
-    }
-
-    const _setUser = (user: User | null) => {
-        setUserState(user);
-    }
-
     /*
     const contextValue = useMemo(
         () => {

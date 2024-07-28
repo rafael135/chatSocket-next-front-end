@@ -1,6 +1,7 @@
 import Button from "@/components/Atoms/Button";
 import Label from "@/components/Atoms/Label";
 import TextInput from "@/components/Atoms/TextInput";
+import LoadingStatus from "@/components/Molecules/LoadingStatus";
 import { UserContext } from "@/contexts/UserContext";
 import { checkInputErrors } from "@/helpers/inputValidation";
 import { InputErrorType } from "@/types/Form";
@@ -12,7 +13,8 @@ import { FormEvent, useContext, useRef, useState } from "react";
 import styled from "styled-components";
 
 const StyledRegisterForm = styled.form({
-    width: "",
+    //width: "",
+    position: "relative",
     padding: "1.25rem 1.5rem",
     overflow: "auto",
     flex: "1 1 0%",
@@ -61,7 +63,7 @@ const Register = () => {
     const validateInputs = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if(name != "" && email != "" && password != "" && confirmPassword != "") {
+        if (name != "" && email != "" && password != "" && confirmPassword != "") {
             //formRef.current!.submit();
 
             try {
@@ -76,10 +78,10 @@ const Register = () => {
 
                 const res: { status: number, user: User, token: string, errors?: InputErrorType[] } = req.data;
 
-                if(res.status != 201) {
+                if (res.status != 201) {
                     let msgAllIndex = res.errors!.findIndex(err => err.target == "all");
 
-                    if(msgAllIndex != -1) {
+                    if (msgAllIndex != -1) {
                         setErrorMsg(res.errors![msgAllIndex].msg);
                     }
 
@@ -90,40 +92,43 @@ const Register = () => {
                     return;
                 }
 
-                if(res.status == 201) {
+                //console.log(res.status);
+
+                if (res.status == 201) {
+                    //console.log(res.token, res.user);
                     userCtx.setToken(res.token);
                     userCtx.setUser(res.user);
 
                     setTimeout(() => {
                         router.push("/");
-                    }, 600);
+                    }, 700);
                 }
-                
+
             }
-            catch(err) {
+            catch (err) {
                 console.error(err);
             }
 
-            
+
 
             return;
         }
 
         let errors: InputErrorType[] = [];
 
-        if(name == "") {
+        if (name == "") {
             errors.push({ target: "name", msg: "Nome não preenchido!" });
         }
 
-        if(email == "") {
+        if (email == "") {
             errors.push({ target: "email", msg: "Email não preenchido!" });
         }
 
-        if(password == "") {
+        if (password == "") {
             errors.push({ target: "password", msg: "Senha não preenchida!" });
         }
 
-        if(confirmPassword != password) {
+        if (confirmPassword != password) {
             errors.push({ target: "confirmPassword", msg: "Senhas diferentes!" });
         }
 
@@ -134,7 +139,7 @@ const Register = () => {
     //    
     //}, [formState])
 
-    return(
+    return (
         <div className="flex w-full h-screen justify-center items-center">
             <StyledRegisterForm
                 className="max-w-xs shadow-2xl sm:max-w-md"
@@ -143,6 +148,11 @@ const Register = () => {
                 //aria-disabled={formStatus.pending}
                 onSubmit={validateInputs}
             >
+
+                {(showLoadingStatus == true) &&
+                    <LoadingStatus setShow={setShowLoadingStatus} loading={loadingStatus} error={hasError} setError={setHasError} msg={errorMsg} />
+                }
+
                 <Label htmlfor="name" content="Nome:" />
                 <TextInput inputRef={nameRef} className="mb-2" name="name" value={name} setValue={setName} />
 
@@ -151,13 +161,13 @@ const Register = () => {
 
                 <Label htmlfor="password" content="Senha:" />
                 <TextInput inputRef={passwordRef} type="password" className="mb-2" name="password" value={password} setValue={setPassword} />
-                
+
                 <Label htmlfor="confirmPassword" content="Repita a senha:" />
                 <TextInput inputRef={confirmPasswordRef} type="password" className="mb-2" name="confirmPassword" value={confirmPassword} setValue={setConfirmPassword} />
 
                 <Button
                     className="w-full mb-2"
-                    onClick={() => {  }}
+                    onClick={() => { }}
                 >
                     Registrar-se
                 </Button>

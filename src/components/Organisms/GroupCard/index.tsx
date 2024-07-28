@@ -56,13 +56,11 @@ const GroupCard = ({ idx, group, className }: props) => {
     const menuCtx = useContext(MenuContext)!;
     const chatCtx = useContext(ChatContext)!;
 
-    const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
-
     const handleExitGroup = async () => {
         let res = await exitGroup(group.uuid);
 
         if (res == true) {
-            chatCtx.setGroups({
+            chatCtx.dispatchGroups({
                 type: "del",
                 group: group
             });
@@ -91,12 +89,6 @@ const GroupCard = ({ idx, group, className }: props) => {
     const handleSelectChat = () => {
         chatCtx.setActiveChat({ index: idx, name: group.name, srcImg: group.groupImg, type: "group", uuid: group.uuid });
     }
-
-    useLayoutEffect(() => {
-        getGroupMessages(group.uuid).then((res) => {
-            setGroupMessages(res);
-        });
-    }, []);
 
     return (
         <AnimatePresence>

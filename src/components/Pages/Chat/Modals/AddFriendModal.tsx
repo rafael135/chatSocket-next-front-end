@@ -71,7 +71,7 @@ const AddFriendModal = ({ }: props) => {
             });
 
             setResult([...friends]);
-            chatCtx.setFriends({
+            chatCtx.dispatchFriends({
                 type: "add",
                 friend: res
             });
@@ -88,7 +88,7 @@ const AddFriendModal = ({ }: props) => {
             });
 
             setResult([...friends]);
-            chatCtx.setFriends({
+            chatCtx.dispatchFriends({
                 type: "del",
                 friend: res
             });

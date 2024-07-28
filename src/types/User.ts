@@ -1,3 +1,4 @@
+import { MessageType } from "./Message";
 
 
 export type User = {
@@ -21,4 +22,6 @@ export type UserFriend = {
     worker?: Worker;
     createdAt: string;
     updatedAt: string;
+
+    messages: MessageType[];
 };

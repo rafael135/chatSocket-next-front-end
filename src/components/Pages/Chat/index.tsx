@@ -242,7 +242,7 @@ const Chat = () => {
                                             {
                                                 chatCtx.friends.map((friend, idx) => {
                                                     return <FriendCard
-                                                        key={idx}
+                                                        key={`${friend.uuid}${friend.nickName}${idx}`}
                                                         idx={idx}
                                                         isSelected={(chatCtx.activeChat?.type == "user" && chatCtx.activeChat.index == idx) ? true : false}
                                                         friend={friend}

@@ -64,7 +64,7 @@ const FriendCard = ({ idx, friend, isSelected, className }: props) => {
         let res = await addOrRemoveFriend(friend.uuid);
 
         if(res == null) {
-            chatCtx.setFriends({
+            chatCtx.dispatchFriends({
                 type: "del",
                 friend: friend
             });

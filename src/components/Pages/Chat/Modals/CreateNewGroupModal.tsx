@@ -30,11 +30,17 @@ const CreateNewGroupModal = ({ }: props) => {
         let res = await createNewGroup(groupName, userCtx.user!.uuid);
 
         if(res != null) {
-            chatCtx.setGroups({
+            chatCtx.dispatchGroups({
                 type: "add",
                 group: res
             });
             menuCtx.setShowCreateGroupModal(false);
+        }
+    }
+
+    const handleInputEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if(e.key == "Enter") {
+            handleCreateGroupBtn();
         }
     }
 
@@ -54,6 +60,7 @@ const CreateNewGroupModal = ({ }: props) => {
                     value={groupName}
                     setValue={setGroupName}
                     type="text"
+                    onKeyDown={handleInputEnter}
                 />
 
                 <Button
