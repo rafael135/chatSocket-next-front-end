@@ -197,7 +197,7 @@ const Chat = () => {
 
             {(userCtx.token != "") &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
-                    <div className="w-60 flex flex-col min-w-60 max-h-max overflow-hidden bg-gray-50">
+                    <div className="w-60 flex flex-col min-w-60 overflow-hidden bg-gray-50">
                         <div className="py-4 px-2 flex justify-around border-solid border-b h-[80px] border-gray-500/40">
                             <Button
                                 onClick={handleShowCreateGroupBtn}
