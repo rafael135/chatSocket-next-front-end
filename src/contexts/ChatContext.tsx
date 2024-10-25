@@ -95,7 +95,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         if (userCtx?.token != "") {
             socketCtx.socket?.connect();
         }
-    }, [socketCtx.socket, userCtx.initialized]);
+    }, [socketCtx.socket, userCtx.initialized, userCtx.user]);
 
     useEffect(() => {
         if (friends.length == 0) {
