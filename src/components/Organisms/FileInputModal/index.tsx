@@ -1,6 +1,10 @@
 import { MenuContext } from "@/contexts/MenuContext";
 import { Modal } from "flowbite-react";
 import { ChangeEvent, MutableRefObject, useContext } from "react";
+import { GrDocument } from "react-icons/gr";
+import { IoDocument } from "react-icons/io5";
+import { IoIosImages } from "react-icons/io";
+
 
 
 
@@ -41,39 +45,61 @@ const FileInputModal = ({ files, setFiles, fileInputRef }: props) => {
     }
 
     return (
-        <Modal show={(menuCtx.showFileInput == true)} onClose={() => { menuCtx.setShowFileInput(false); }} >
-            <Modal.Header>
+    <Modal show={menuCtx.showFileInput} onClose={() => menuCtx.setShowFileInput(false)}>
+    <Modal.Header>
+        <h2 className="text-lg font-semibold">Enviar Arquivos</h2>
+    </Modal.Header>
+    <Modal.Body>
+        <div className="flex flex-col items-center justify-center">
+            <div className="flex space-x-4"> {/* Adicionando um contêiner flexível */}
 
-            </Modal.Header>
-
-            <Modal.Body>
-                <label
-                    className="w-full h-24 flex justify-center items-center border border-solid border-gray-500/40 rounded-lg hover:bg-black/10"
-                    htmlFor="files"
-                    onDragOver={handleLabelDragOver}
-                    onDrop={handleLabelDrop}
-                >
-                    {(files.length == 0) &&
-                        <h2 className="text-2xl">Solte a(s) imagen(s) aqui</h2>
-                    }
-
-                    {(files.length > 0) &&
-                        files.map((file, idx) => {
-                            return <div key={idx}></div>
-                        })
-                    }
-                </label>
-                <input
-                    id="files"
-                    type="file"
-                    onChange={handleInputChange}
-                    multiple={true}
-                    hidden={true}
-                    ref={fileInputRef}
+            <div className="flex flex-col items-center">
+            <IoDocument
+                className={`w-8 h-8 fill-gray-500/60 rounded-full ${
+                    menuCtx.showFileInput ? "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500" : "cursor-default"
+                }`}
+                onClick={() => fileInputRef.current?.click()} // Abre o seletor de arquivos
                 />
-            </Modal.Body>
-        </Modal>
-    )
-}
+                <span className="text-gray-500 mt-1">documento</span>
+            </div>
+
+                
+            <div className="flex flex-col items-center">
+                <IoIosImages
+                    className={`w-10 h-8 fill-gray-500/60 rounded-full ${
+                        menuCtx.showFileInput ? "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500" : "cursor-default"
+                    }`}
+                    onClick={() => fileInputRef.current?.click()} // Abre o seletor de arquivos
+                />
+                <span className="text-gray-500 mt-1">figurinha</span>
+            </div>
+                
+            </div>
+            {files.length > 0 ? (
+                <div className="mt-4">
+                    {files.map((file, idx) => (
+                        <div key={idx} className="py-1">
+                            {file.name} {/* Exibe o nome do arquivo */}
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="mt-4 text-gray-500"></p>
+            )}
+            <input
+                id="files"
+                type="file"
+                onChange={handleInputChange}
+                multiple
+                hidden
+                ref={fileInputRef}
+            />
+        </div>
+    </Modal.Body>
+</Modal>
+
+    );
+};
+
 
 export default FileInputModal;

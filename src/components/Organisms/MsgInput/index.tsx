@@ -7,6 +7,7 @@ import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-rea
 import { useContext, useEffect, useState } from "react";
 import { BsArrowRight, BsEmojiNeutralFill, BsPaperclip } from "react-icons/bs";
 import styled from "styled-components";
+import { MdAdd } from "react-icons/md";
 
 const StyledBtnFiles = styled.svg.attrs(() => ({}))`
 
@@ -132,11 +133,19 @@ const MsgInput = ({ selectedFiles, loggedUser, clearFiles, setSelectedFiles }: p
             }
 
             <div className="h-12 w-full px-2 mt-auto flex gap-2 items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
+                
                 <BsEmojiNeutralFill
                     className={`w-8 h-8 fill-gray-500/60 rounded-full
                         ${(socketCtx.socket == null || chatCtx.activeChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
-                    `}
+                    `}  // Ícone de emoji que verifica se o chat está ativo antes de exibir o seletor de emoji
                     onClick={() => { if (chatCtx.activeChat != null) { setShowEmojiPicker(!showEmojiPicker); } }}
+                />
+
+                <MdAdd
+                    className={`w-8 h-8 fill-gray-500/60 rounded-full
+                        ${(socketCtx.socket == null || chatCtx.activeChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                    `}// Enviar imagem
+                    onClick={() => { if (socketCtx.socket != null && chatCtx.activeChat != null && sendingMsg != true) { menuCtx.setShowFileInput(true); } }}
                 />
 
                 <input
@@ -153,14 +162,7 @@ const MsgInput = ({ selectedFiles, loggedUser, clearFiles, setSelectedFiles }: p
                     className="hidden"
                     action="">
 
-                </form>
-
-                <BsPaperclip
-                    className={`w-8 h-8 fill-gray-500/60 rounded-full
-                        ${(socketCtx.socket == null || chatCtx.activeChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
-                    `}
-                    onClick={() => { if (socketCtx.socket != null && chatCtx.activeChat != null && sendingMsg != true) { menuCtx.setShowFileInput(true); } }}
-                />
+                </form>                
 
                 <BsArrowRight
                     className={`w-8 h-8 p-0.5 fill-gray-500/60 rounded-full
