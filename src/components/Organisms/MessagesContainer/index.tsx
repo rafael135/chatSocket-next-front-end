@@ -7,7 +7,7 @@ import { useMessages } from "@/utils/queries";
 import { Spinner } from "flowbite-react";
 import { MouseEvent, useContext, useEffect, useRef } from "react";
 import Image from "next/image";
-import Paragraph from "../../Atoms/Paragraph";
+import Paragraph from "@/components/Atoms/Paragraph";
 
 import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
 import UserInfo from "../UserInfo";
@@ -16,9 +16,6 @@ import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
 import { MenuContext } from "@/contexts/MenuContext";
 import { ChatContext } from "@/contexts/ChatContext";
 import { SocketContext } from "@/contexts/SocketContext";
-import { queryClient } from "@/utils/queryClient";
-import { MessageType } from "@/types/Message";
-
 
 
 type props = {
@@ -75,32 +72,6 @@ const MessagesContainer = ({  }: props) => {
             });
         }, 90);
     }, [chatCtx.activeMessages]);
-
-    // Monitora se há uma nova mensagem em um usuário
-    socketCtx.socket?.on("new_private_msg", (newMsg: MessageType) => {
-        //dispatchFriendsMessages({ type: "add", message: newMsg });
-
-        queryClient.setQueryData(["user", newMsg.toUuid], [...(queryClient.getQueryData(["user", newMsg.toUuid]) as MessageType[]), newMsg]);
-        if (newMsg.toUuid == chatCtx.activeChat?.uuid) {
-            chatCtx.dispatchActiveMessages({
-                type: "add",
-                message: newMsg
-            });
-        }
-    });
-
-    // Monitora se há uma nova mensagem em um grupo
-    socketCtx.socket?.on("new_group_msg", (newMsg: MessageType) => {
-        //dispatchGroupsMessages({ type: "add", message: newMsg });
-
-        queryClient.setQueryData(["group", newMsg.toUuid], [...(queryClient.getQueryData(["group", newMsg.toUuid]) as MessageType[]), newMsg]);
-        if (newMsg.toUuid == chatCtx.activeChat?.uuid) {
-            chatCtx.dispatchActiveMessages({
-                type: "add",
-                message: newMsg
-            });
-        }
-    });
     
 
     return (

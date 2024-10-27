@@ -2,7 +2,10 @@
 
 import { MessageImageType, MessageType } from "@/types/Message";
 import { User } from "@/types/User";
-import { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
+import { SocketContext } from "./SocketContext";
+import { queryClient } from "@/utils/queryClient";
+import { ChatContext } from "./ChatContext";
 
 
 
@@ -21,11 +24,47 @@ export const MessagesContext = createContext<MessageContextType | null>(null);
 
 export const MessagesProvider = ({ children }: { children: ReactNode }) => {
     const [messages, setMessages] = useState<MessageTypeGeneral[]>([]);
+    const socketCtx = useContext(SocketContext)!;
+    const chatCtx = useContext(ChatContext)!;
+
+
+
+    useLayoutEffect(() => {
+        // Monitora se há uma nova mensagem em um usuário
+        socketCtx.socket?.on("new_private_msg", (newMsg: MessageType) => {
+            //dispatchFriendsMessages({ type: "add", message: newMsg });
+            
+            console.log(newMsg)
+
+            queryClient.setQueryData(["user", newMsg.toUuid], [...(queryClient.getQueryData(["user", newMsg.toUuid]) as MessageType[]), newMsg]);
+            if (newMsg.toUuid == chatCtx.activeChat?.uuid) {
+                chatCtx.dispatchActiveMessages({
+                    type: "add",
+                    message: newMsg
+                });
+            }
+        });
+
+        // Monitora se há uma nova mensagem em um grupo
+        socketCtx.socket?.on("new_group_msg", (newMsg: MessageType) => {
+            //dispatchGroupsMessages({ type: "add", message: newMsg });
+
+            console.log(newMsg)
+
+            queryClient.setQueryData(["group", newMsg.toUuid], [...(queryClient.getQueryData(["group", newMsg.toUuid]) as MessageType[]), newMsg]);
+            if (newMsg.toUuid == chatCtx.activeChat?.uuid) {
+                chatCtx.dispatchActiveMessages({
+                    type: "add",
+                    message: newMsg
+                });
+            }
+        });
+    }, [socketCtx.socket])
 
 
     return (
         <MessagesContext.Provider value={{ messages: messages, setMessages: setMessages }}>
-            { children }
+            {children}
         </MessagesContext.Provider>
     )
 }

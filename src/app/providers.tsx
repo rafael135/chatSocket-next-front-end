@@ -15,15 +15,16 @@ const Providers = ({ children }: { children: ReactNode }) => {
             {/*<ProtectRoute>*/}
             <SocketContextProvider>
 
-                <MessagesProvider>
-                    <ChatContextProvider>
+                <ChatContextProvider>
+                    <MessagesProvider>
+                    
                         <QueryProvider>
                             <MenuContextProvider>
                                 {children}
                             </MenuContextProvider>
                         </QueryProvider>
-                    </ChatContextProvider>
-                </MessagesProvider>
+                    </MessagesProvider>
+                </ChatContextProvider>
 
             </SocketContextProvider>
             {/*</ProtectRoute>*/}

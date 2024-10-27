@@ -27,24 +27,8 @@ export type ImgReceiveType = {
     imgs: string[];
 }
 
-export type GroupMessage = {
-    uuid: string;
-    fromUserUuid: string;
-    user: User;
-    toGroupUuid: string;
-    body: string;
-    createdAt: string;
-    updatedAt: string;
-};
 
-export type UserMessage = {
-    uuid: string;
-    fromUserUuid: string;
-    toUserUuid: string;
-    body: string;
-    createdAt: string;
-    updatedAt: string;
-};
+
 
 export type SelectedChatInfo = {
     index: number;
