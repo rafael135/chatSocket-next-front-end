@@ -198,22 +198,26 @@ const Chat = () => {
             {(userCtx.token != "") &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
                     <div className="w-60 flex flex-col min-w-60 overflow-hidden bg-gray-50">
-                        <div className="py-4 px-2 flex justify-around border-solid border-b h-[80px] border-gray-500/40">
+                        <div className="py-4 px-2 flex justify-start border-solid border-b h-[80px] border-gray-500/40">
+                            {/*}
                             <Button
                                 onClick={handleShowCreateGroupBtn}
                                 className="!bg-transparent border-solid border border-gray-500/40 !duration-100 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
                                 title="Criar grupo"
                             >
+                            
                                 <BsPlus className="fill-blue-600 w-8 h-auto hover:!bg-transparent transition-all group-active:fill-white" />
                                 <p className="transition-all group-hover:!bg-transparent group-hover:!text-slate-800 group-active:!text-white">Criar grupo</p>
                             </Button>
+                            {*/}
 
                             <Button
                                 onClick={handleShowAddFriendBtn}
-                                className="!bg-transparent border-solid border border-gray-500/40 !duration-100 hover:!bg-gray-200 active:!bg-blue-500 group"
+                                className="!bg-transparent w-full border-solid border border-gray-500/40 !duration-100 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
                                 title="Adicionar Amigo"
                             >
                                 <BsPersonFillAdd className="fill-blue-600 w-8 h-auto hover:!bg-transparent group-active:fill-white" />
+                                <p className="ms-2 transition-all group-hover:!bg-transparent group-hover:!text-slate-800 group-active:!text-white">Procurar Amigo</p>
                             </Button>
                         </div>
 
@@ -225,10 +229,12 @@ const Chat = () => {
                                     <Tab placeholder="Friends" key={"friends"} value={"friends"}>
                                         Amigos
                                     </Tab>
-                                    {/* @ts-ignore */}
+                                    {/*}
+                                    {/* @ts-ignore
                                     <Tab placeholder="Groups" key="groups" value="groups">
                                         Grupos
                                     </Tab>
+                                    */}
                                 </TabsHeader>
                                 
                                 {/* @ts-ignore */}

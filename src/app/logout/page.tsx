@@ -17,20 +17,14 @@ const Logout = () => {
             userCtx.setToken("");
             userCtx.setUser(null);
 
-            setTimeout(() => {
-                router.push("/");
-            }, 1000);
+            return router.push("/")
         }
         
 
         
     }, [userCtx.initialized]);
 
-    return(
-        <div>
-
-        </div>
-    );
+    
 }
 
 export default Logout;

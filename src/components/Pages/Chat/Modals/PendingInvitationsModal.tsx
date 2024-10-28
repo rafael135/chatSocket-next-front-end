@@ -9,7 +9,7 @@ import { addOrRemoveFriend, getPendingFriends } from "@/lib/actions";
 import { FaArrowRotateRight } from "react-icons/fa6";
 import { UserFriend } from "@/types/User";
 import { Spinner } from "flowbite-react";
-import { useContext, useState } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { ChatContext } from "@/contexts/ChatContext";
 
 
@@ -26,6 +26,7 @@ const PendingInvitationsModal = ({ }: props) => {
 
     const [pendingFriends, setPendingFriends] = useState<UserFriend[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
+    const [initialized, setInitialized] = useState<boolean>(false);
 
     const handleAcceptFriend = async (friendUuid: string, friend: UserFriend) => {
         setLoading(true);
@@ -49,6 +50,13 @@ const PendingInvitationsModal = ({ }: props) => {
         setPendingFriends(res);
         setLoading(false);
     }
+
+    useLayoutEffect(() => {
+        if(initialized == false) {
+            setInitialized(true);
+            handlePendingFriends();
+        }
+    })
 
 
 
